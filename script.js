@@ -16,7 +16,8 @@ const divKey = document.querySelector(".divide");
 const invKey = document.querySelector(".invert");
 const sqKey = document.querySelector(".squared");
 const rootKey = document.querySelector(".root");
-const dotKey = document.querySelector(".dot")
+const percentKey = document.querySelector(".percentage");
+const dotKey = document.querySelector(".dot");
 const evaluateKey = document.querySelector(".equal");
 const displayWindow = document.getElementById("display");
 
@@ -70,13 +71,17 @@ for (let i = 0; i < button.length; i++) {
   });
 }
 
-dotKey.addEventListener("mouseenter", () => {
-  if (displayWindow.textContent.match(/\./g)) {
-    dotKey.disabled = true;
-} else {
-  dotKey.disabled = false;
-}
-})
+dotKey.addEventListener("click", () => {
+  if (currentOperand == "") {
+    currentOperand = "0.";
+    displayWindow.textContent = currentOperand;
+  } else if (currentOperand.match(/\./g)) {
+    currentOperand = displayWindow.textContent;
+  } else {
+    currentOperand += ".";
+    displayWindow.textContent = currentOperand;
+  }
+});
 
 clear.addEventListener("click", () => {
   currentOperand = "";
@@ -100,13 +105,17 @@ delKey.addEventListener("click", () => {
 
 posNeg.addEventListener("click", () => {
   if (displayWindow.textContent !== "You can't divide by zero!")
-    displayWindow.textContent *= -1
-    currentOperand = displayWindow.textContent;
+    displayWindow.textContent *= -1;
+  currentOperand = displayWindow.textContent;
 });
 
 invKey.addEventListener("click", () => {
-  if (displayWindow.textContent !== "You can't divide by zero!")
+  if (displayWindow.textContent == "0") {
+    currentOperand = "";
+    displayWindow.textContent = "You can't divide by zero!";
+  } else if (displayWindow.textContent !== "You can't divide by zero!") {
     displayWindow.textContent = currentOperand = 1 / Number(currentOperand);
+  }
 });
 
 sqKey.addEventListener("click", () => {
@@ -115,7 +124,6 @@ sqKey.addEventListener("click", () => {
       Number(currentOperand),
       2
     );
-    currentOperand = displayWindow.textContent;
 });
 
 rootKey.addEventListener("click", () => {
@@ -123,10 +131,14 @@ rootKey.addEventListener("click", () => {
     displayWindow.textContent = currentOperand = Math.sqrt(
       Number(currentOperand)
     );
-    currentOperand = displayWindow.textContent;
 });
 
-addKey.addEventListener("click", () => {
+percentKey.addEventListener("click", () => {
+  if (displayWindow.textContent !== "You can't divide by zero!")
+    displayWindow.textContent = currentOperand = Number(currentOperand) / 100;
+});
+
+let operation = op => {
   if (operator != "")
     operate(operator, Number(previousOperand), Number(currentOperand));
   if (
@@ -137,49 +149,23 @@ addKey.addEventListener("click", () => {
     currentOperand = displayWindow.textContent;
   if (currentOperand != "") previousOperand = currentOperand;
   currentOperand = "";
-  operator = "+";
+  operator = op;
+};
+
+addKey.addEventListener("click", () => {
+  operation("+");
 });
 
 subKey.addEventListener("click", () => {
-  if (operator != "")
-    operate(operator, Number(previousOperand), Number(currentOperand));
-  if (
-    displayWindow.textContent != "" &&
-    currentOperand == "" &&
-    displayWindow.textContent !== "You can't divide by zero!"
-  )
-    currentOperand = displayWindow.textContent;
-  if (currentOperand != "") previousOperand = currentOperand;
-  currentOperand = "";
-  operator = "-";
+  operation("-");
 });
 
 mulKey.addEventListener("click", () => {
-  if (operator != "")
-    operate(operator, Number(previousOperand), Number(currentOperand));
-  if (
-    displayWindow.textContent != "" &&
-    currentOperand == "" &&
-    displayWindow.textContent !== "You can't divide by zero!"
-  )
-    currentOperand = displayWindow.textContent;
-  if (currentOperand != "") previousOperand = currentOperand;
-  currentOperand = "";
-  operator = "*";
+  operation("*");
 });
 
 divKey.addEventListener("click", () => {
-  if (operator != "")
-    operate(operator, Number(previousOperand), Number(currentOperand));
-  if (
-    displayWindow.textContent != "" &&
-    currentOperand == "" &&
-    displayWindow.textContent !== "You can't divide by zero!"
-  )
-    currentOperand = displayWindow.textContent;
-  if (currentOperand != "") previousOperand = currentOperand;
-  currentOperand = "";
-  operator = "/";
+  operation("/");
 });
 
 evaluateKey.addEventListener("click", () => {
@@ -187,5 +173,66 @@ evaluateKey.addEventListener("click", () => {
   if (operator != "")
     operate(operator, Number(previousOperand), Number(currentOperand));
   previousOperand = currentOperand;
-  currentOperand = "";
+  currentOperand = displayWindow.textContent;
+});
+
+// Key disables
+
+let disableOp = key => {
+  if (
+    (currentOperand === "" && previousOperand === "") ||
+    currentOperand === "."
+  ) {
+    key.disabled = true;
+  } else {
+    key.disabled = false;
+  }
+};
+
+let disable = key => {
+  if (displayWindow.textContent == "" || displayWindow.textContent == ".") {
+    key.disabled = true;
+  } else {
+    key.disabled = false;
+  }
+};
+
+addKey.addEventListener("mouseenter", () => {
+  disableOp(addKey);
+});
+
+subKey.addEventListener("mouseenter", () => {
+  disableOp(subKey);
+});
+
+mulKey.addEventListener("mouseenter", () => {
+  disableOp(mulKey);
+});
+
+divKey.addEventListener("mouseenter", () => {
+  disableOp(divKey);
+});
+
+rootKey.addEventListener("mouseenter", () => {
+  if (
+    displayWindow.textContent.match(/\-/g) ||
+    currentOperand == "" ||
+    currentOperand === "."
+  ) {
+    rootKey.disabled = true;
+  } else {
+    rootKey.disabled = false;
+  }
+});
+
+invKey.addEventListener("mouseenter", () => {
+  disable(invKey);
+});
+
+sqKey.addEventListener("mouseenter", () => {
+  disable(sqKey);
+});
+
+percentKey.addEventListener("mouseenter", () => {
+  disable(percentKey);
 });
